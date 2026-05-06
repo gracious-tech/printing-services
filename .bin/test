@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+# Execute from project root
+cd "$(dirname "$0")/.."
+
+# Run tests
+npx vitest run

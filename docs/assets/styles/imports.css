@@ -1,0 +1,22 @@
+
+/* These seem to not work when done in sass, maybe due to tailwind tooling? */
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* Royal purple dark theme */
+:root {
+    --color-bg: #0d0915;
+    --color-surface: #16101f;
+    --color-surface-raised: #1e1529;
+    --color-border: #2e2245;
+    --color-text: #f5f3f7;
+    --color-text-muted: #cdc4d9;
+    --color-accent: #9333ea;
+    --color-accent-light: #a855f7;
+    --color-accent-dim: #6b21a8;
+}
+
+body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+}

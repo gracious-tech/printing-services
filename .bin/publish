@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+
+# Execute from project root
+cd "$(dirname "$0")/.."
+
+# Build and test
+.bin/build
+.bin/test
+
+# Publish to npm
+npm adduser
+npm publish --access public

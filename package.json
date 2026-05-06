@@ -1,0 +1,35 @@
+{
+  "name": "printing-services",
+  "version": "1.0.0",
+  "description": "Get book dimensions for popular printing services, such as bleed, safety margin, and spine width.",
+  "license": "MIT-0",
+  "author": {
+    "name": "Gracious Tech",
+    "url": "https://gracious.tech"
+  },
+  "homepage": "https://printing-services.paper.bible",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gracious-tech/printing-services"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "big.js": "^7.0.1"
+  },
+  "devDependencies": {
+    "@types/big.js": "^6.2.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  }
+}

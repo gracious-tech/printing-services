@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+# Execute from project root
+cd "$(dirname "$0")/.."
+
+# Start docs dev server
+cd docs
+npx nuxt dev

@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+
+# Execute from project root
+cd "$(dirname "$0")/.."
+
+# Build the library first (docs depend on it)
+.bin/build
+
+# Build the docs site
+cd docs
+npx nuxt generate

@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+# Execute from project root
+cd "$(dirname "$0")/.."
+
+# Clean previous build
+rm -rf dist
+
+# Compile TypeScript
+npx tsc

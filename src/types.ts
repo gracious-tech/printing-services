@@ -1,0 +1,313 @@
+
+export type UnitType = 'inch'|'mm'
+
+// All known binding IDs across all services
+export type BindingTypeId =
+    | 'paperback'
+    | 'paperback_coil'
+    | 'paperback_wire'
+    | 'paperback_stitch'
+    | 'hardcover'
+    | 'hardcover_jacket'
+
+// All known paper type IDs across all services
+export type PaperTypeId =
+    | 'cream'  // Whatever the standard gsm is
+    | 'white'  // Whatever the standard gsm is
+    | 'white_coated'
+    | 'white_coated_denser'
+
+// All known ink type IDs across all services
+export type InkTypeId =
+    | 'bw'
+    | 'bw_premium'
+    | 'color'
+    | 'color_premium'
+
+// All known cover type IDs across all services
+export type CoverTypeId =
+    | 'glossy'
+    | 'glossy_paper'  // Same thickness as interior pages
+    | 'matte'
+
+// All known size IDs across all services
+export type SizeId =
+    | 'pocket_book'
+    | 'novella'
+    | 'b_format'
+    | 'x_novella_wider'
+    | 'digest'
+    | 'a5'
+    | 'a5_landscape'
+    | 'us_trade'
+    | 'royal'
+    | 'x_royal_larger'
+    | 'executive'
+    | 'crown_quarto'
+    | 'x_crown_quarto_similar'
+    | 'x_executive_wider'
+    | 'x_landscape'
+    | 'x_square_smaller'
+    | 'small_square'
+    | 'a4'
+    | 'square'
+    | 'us_letter'
+    | 'x_us_letter_narrower'
+    | 'small_landscape'
+    | 'us_letter_landscape'
+    | 'a4_landscape'
+
+export interface ExpenseRatings {
+    // Expense rating based on following ranks in AUD
+    // 1 = 0-5, 2 = 5-8, 3 = 8-12, 4 = 12-18, 5 = 18-26
+    // 6 = 26-36, 7 = 36-48, 8 = 48-62, 9 = 62-80, 10 = 80+
+    booklet:number|null  // 24 pages, US Trade or A5
+    booklet_100:number|null
+    booklet_color:number|null  // All are premium color since standard not always available
+    booklet_color_100:number|null
+    paperback:number|null  // 300 pages, US Trade
+    paperback_100:number|null
+    paperback_color:number|null
+    hardcover:number|null  // 300 pages, US Trade
+    hardcover_color:number|null
+}
+
+export interface ServicePublic {
+    id:string
+    name:string
+    countries:null|string[]
+    quality:number
+    expense:ExpenseRatings
+    get_sizes:(args?:GetSizesArgs) => GetSizesItem[]
+    get_binding_types:(args?:GetBindingTypesArgs) => GetBindingTypesItem[]
+    get_ink_types:(args?:GetInkTypesArgs) => GetInkTypesItem[]
+    get_paper_types:(args?:GetPaperTypesArgs) => GetPaperTypesItem[]
+    get_cover_types:(args?:GetCoverTypesArgs) => GetCoverTypesItem[]
+    get_dimensions:(args:GetDimensionsArgs) => GetDimensionsResult
+    interior_calc_requires_binding:boolean
+    cover_calc_requires_binding:boolean
+    cover_calc_requires_paper:boolean
+    cover_calc_requires_ink:boolean
+    url_website:string
+    url_guide:string
+    url_pricing:string
+    raw:ServiceConfig
+}
+
+export interface GetSizesArgs {
+    binding_type?:BindingTypeId
+    unit?:UnitType
+}
+
+
+export interface GetSizesItem {
+    id:string
+    name:string
+    expense:number
+    width:Big
+    height:Big
+    unit:UnitType
+}
+
+export interface GetBindingTypesArgs {
+    pages?:number
+    size?:SizeId  // Not allowed to pass custom size here, unlike GetDimensionsArgs
+    paper_type?:PaperTypeId
+    ink_type?:InkTypeId
+}
+
+export interface GetBindingTypesItem {
+    id:string
+    name:string
+    expense:number
+}
+
+export interface GetPaperTypesArgs {
+    binding_type?:BindingTypeId
+    ink_type?:InkTypeId
+}
+
+export interface GetPaperTypesItem {
+    id:string
+    name:string
+    expense:number
+}
+
+export interface GetInkTypesArgs {
+    binding_type?:BindingTypeId
+    paper_type?:PaperTypeId
+}
+
+export interface GetInkTypesItem {
+    id:string
+    name:string
+    expense:number
+}
+
+export interface GetCoverTypesArgs {
+    // Cover type is never filtered by other options
+}
+
+export interface GetCoverTypesItem {
+    id:string
+    name:string
+    expense:number
+}
+
+export interface CustomSize {
+    unit:UnitType
+    width:number|string|Big
+    height:number|string|Big
+}
+
+export interface GetDimensionsArgs {
+    size:SizeId|CustomSize
+    pages:number
+    binding_type:BindingTypeId
+    paper_type?:PaperTypeId
+    ink_type?:InkTypeId
+    unit?:UnitType
+}
+
+export interface Region {
+    x:Big
+    y:Big
+    w:Big
+    h:Big
+}
+
+export interface GetDimensionsResult {
+    unit:UnitType
+
+    interior_bleed:Big
+    interior_margin:Big
+    interior_gutter:Big
+
+    interior_safe_width:Big
+    interior_safe_height:Big
+    interior_trim_width:Big
+    interior_trim_height:Big
+    interior_total_width:Big
+    interior_total_height:Big
+
+    cover_bleed:Big
+    cover_margin:Big
+    cover_spine:Big
+    cover_spine_margin:Big
+
+    cover_face_width:Big
+    cover_face_height:Big
+    cover_safe_width:Big
+    cover_safe_height:Big
+    cover_trim_width:Big
+    cover_trim_height:Big
+    cover_total_width:Big
+    cover_total_height:Big
+
+    cover_region_back:Region
+    cover_region_spine:Region
+    cover_region_front:Region
+
+    interior_includes_cover:boolean
+    interior_blank_pages:number  // Num pages to add before backcover when `interior_has_cover` true
+    interior_has_bleed:boolean|'outer-only'
+    cover_has_bleed:boolean
+    cover_has_spine:boolean
+    cover_has_spine_text:boolean
+    cover_has_flaps:boolean
+}
+
+
+export interface CalcArgs {
+    size:{width:Big, height:Big}
+    pages:number
+    binding_type:BindingTypeId
+    ink_type:InkTypeId|undefined
+    paper_type:PaperTypeId|undefined
+}
+
+export interface GenSizeInput {
+    expense?:number
+    excluded_bindings?:BindingTypeId[]
+}
+
+
+// ServiceConfigs
+// These configs exclude options that come after in sequence
+//     Size -> Binding -> Ink -> Paper
+//     E.g. If a paper and binding can't go together, it's specified in the binding only
+//     Then other logic will reverse the check as needed
+// Cover type is never dependent on other options since uncommon and simplifies things
+
+export interface ServiceConfigSize {
+    name:string
+    expense:number
+    width:Big
+    height:Big
+    excluded_bindings:BindingTypeId[]
+}
+
+export interface ServiceConfigBindingType {
+    name:string
+    expense:number
+    min_pages:number
+    max_pages:number
+    excluded_ink_types?:InkTypeId[]
+    excluded_paper_types?:PaperTypeId[]
+}
+
+export interface ServiceConfigInkType {
+    name:string
+    expense:number
+    excluded_paper_types?:PaperTypeId[]
+}
+
+export interface ServiceConfigPaperType {
+    name:string
+    expense:number
+}
+
+export interface ServiceConfigCoverType {
+    name:string
+    expense:number
+}
+
+export interface ServiceConfig {
+    id:string
+    name:string
+    countries:null|string[]  // null for global
+    quality:number  // 1=low (officeworks), 2=medium (kdp), 3=high (lulu)
+    expense:ExpenseRatings
+
+    unit:UnitType
+    sizes:Partial<Record<SizeId, ServiceConfigSize>>
+
+    binding_types:Partial<Record<BindingTypeId, ServiceConfigBindingType>>
+    ink_types:Partial<Record<InkTypeId, ServiceConfigInkType>>
+    paper_types:Partial<Record<PaperTypeId, ServiceConfigPaperType>>
+    cover_types:Partial<Record<CoverTypeId, ServiceConfigCoverType>>
+
+    interior_includes_cover:boolean
+    interior_calc_requires_binding:boolean
+    cover_calc_requires_binding:boolean
+    cover_calc_requires_paper:boolean
+    cover_calc_requires_ink:boolean
+
+    calc_interior_bleed(args:CalcArgs):Big
+    calc_interior_bleed_outer_only:boolean
+    calc_interior_margin(args:CalcArgs):Big
+    calc_interior_gutter(args:CalcArgs):Big
+
+    calc_cover_bleed(args:CalcArgs):Big
+    calc_cover_margin(args:CalcArgs):Big
+    calc_cover_spine(args:CalcArgs):Big
+    calc_cover_spine_margin(args:CalcArgs):Big
+    calc_cover_spine_text(args:CalcArgs):boolean
+    calc_cover_flap(args:CalcArgs):Big
+    calc_cover_overhang_width(args:CalcArgs):Big
+    calc_cover_overhang_height(args:CalcArgs):Big
+
+    url_website:string
+    url_guide:string
+    url_pricing:string
+}
