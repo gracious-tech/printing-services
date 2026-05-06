@@ -66,28 +66,30 @@ div.space-y-8
                 class='w-full'
             )
 
-        //- Ink type selector (only shown when needed for calculation and multiple options)
-        UFormField(v-if='service.cover_calc_requires_ink && ink_options.length > 1' label='Ink Type')
+        //- Ink type selector
+        UFormField(label='Ink Type')
             USelect(
                 v-model='selected_ink'
                 :items='ink_options'
+                :disabled='!service.cover_calc_requires_ink'
                 placeholder='Select...'
                 class='w-full'
             )
 
-        //- Paper type selector (only shown when needed for calculation and multiple options)
-        UFormField(v-if='service.cover_calc_requires_paper && paper_options.length > 1' label='Paper Type')
+        //- Paper type selector
+        UFormField(label='Paper Type')
             USelect(
                 v-model='selected_paper'
                 :items='paper_options'
+                :disabled='!service.cover_calc_requires_paper'
                 placeholder='Select...'
                 class='w-full'
             )
 
     //- Results
     DimensionsTable(v-if='dimensions' :dims='dimensions')
-    div.text-sm.py-12.text-center(v-else style='color: var(--color-text-muted)')
-        | Select all required options to calculate dimensions
+    div.text-sm.py-12.text-center(v-else-if='warning' style='color: var(--color-text-muted)')
+        | {{ warning }}
 </template>
 
 <script setup lang="ts">
@@ -129,37 +131,55 @@ const service_options = computed(() => {
     return services.map(s => ({label: s.name, value: s.id}))
 })
 
+// Build options with disabled state for invalid combinations
 const size_options = computed(() => {
-    return service.value.get_sizes({
+    const valid = new Set(service.value.get_sizes({
         binding_type: selected_binding.value as BindingTypeId | undefined,
         unit: unit.value as UnitType,
-    }).map(s => ({
+    }).map(s => s.id))
+    return service.value.get_sizes({unit: unit.value as UnitType}).map(s => ({
         label: `${s.name} (${s.width.round(3)}\u00D7${s.height.round(3)})`,
         value: s.id,
+        disabled: !valid.has(s.id),
     }))
 })
 
 const binding_options = computed(() => {
-    return service.value.get_binding_types({
+    const valid = new Set(service.value.get_binding_types({
         pages: pages.value,
         size: selected_size.value as SizeId | undefined,
         ink_type: selected_ink.value as InkTypeId | undefined,
         paper_type: selected_paper.value as PaperTypeId | undefined,
-    }).map(b => ({label: b.name, value: b.id}))
+    }).map(b => b.id))
+    return service.value.get_binding_types().map(b => ({
+        label: b.name,
+        value: b.id,
+        disabled: !valid.has(b.id),
+    }))
 })
 
 const ink_options = computed(() => {
-    return service.value.get_ink_types({
+    const valid = new Set(service.value.get_ink_types({
         binding_type: selected_binding.value as BindingTypeId | undefined,
         paper_type: selected_paper.value as PaperTypeId | undefined,
-    }).map(i => ({label: i.name, value: i.id}))
+    }).map(i => i.id))
+    return service.value.get_ink_types().map(i => ({
+        label: i.name,
+        value: i.id,
+        disabled: !valid.has(i.id),
+    }))
 })
 
 const paper_options = computed(() => {
-    return service.value.get_paper_types({
+    const valid = new Set(service.value.get_paper_types({
         binding_type: selected_binding.value as BindingTypeId | undefined,
         ink_type: selected_ink.value as InkTypeId | undefined,
-    }).map(p => ({label: p.name, value: p.id}))
+    }).map(p => p.id))
+    return service.value.get_paper_types().map(p => ({
+        label: p.name,
+        value: p.id,
+        disabled: !valid.has(p.id),
+    }))
 })
 
 const unit_options = [
@@ -175,70 +195,97 @@ watch(service_id, () => {
     selected_paper.value = undefined
 })
 
-// Auto-select when only one option exists, reset if current selection is invalid
+// Auto-select when only one enabled option, reset if current selection becomes disabled
 watch(binding_options, (list) => {
-    if (list.length === 1) {
-        selected_binding.value = list[0]!.value
+    const enabled = list.filter(b => !b.disabled)
+    if (enabled.length === 1) {
+        selected_binding.value = enabled[0]!.value
     } else if (selected_binding.value
-            && !list.some(b => b.value === selected_binding.value)) {
+            && !enabled.some(b => b.value === selected_binding.value)) {
         selected_binding.value = undefined
     }
 }, {immediate: true})
 
 watch(ink_options, (list) => {
-    if (list.length === 1) {
-        selected_ink.value = list[0]!.value
+    const enabled = list.filter(i => !i.disabled)
+    if (enabled.length === 1) {
+        selected_ink.value = enabled[0]!.value
     } else if (selected_ink.value
-            && !list.some(i => i.value === selected_ink.value)) {
+            && !enabled.some(i => i.value === selected_ink.value)) {
         selected_ink.value = undefined
     }
 }, {immediate: true})
 
 watch(paper_options, (list) => {
-    if (list.length === 1) {
-        selected_paper.value = list[0]!.value
+    const enabled = list.filter(p => !p.disabled)
+    if (enabled.length === 1) {
+        selected_paper.value = enabled[0]!.value
     } else if (selected_paper.value
-            && !list.some(p => p.value === selected_paper.value)) {
+            && !enabled.some(p => p.value === selected_paper.value)) {
         selected_paper.value = undefined
     }
 }, {immediate: true})
 
 watch(size_options, (list) => {
-    if (selected_size.value && !list.some(s => s.value === selected_size.value)) {
+    const enabled = list.filter(s => !s.disabled)
+    if (selected_size.value && !enabled.some(s => s.value === selected_size.value)) {
         selected_size.value = undefined
     }
 }, {immediate: true})
 
-// Whether we have enough to calculate
-const can_calculate = computed(() => {
+// Calculate dimensions and capture any error
+const calc_result = computed<{result:GetDimensionsResult | null, error:string | null}>(() => {
     if (!selected_size.value || !selected_binding.value || !pages.value) {
-        return false
+        return {result: null, error: null}
     }
     if (service.value.cover_calc_requires_paper && !selected_paper.value) {
-        return false
+        return {result: null, error: null}
     }
     if (service.value.cover_calc_requires_ink && !selected_ink.value) {
-        return false
-    }
-    return true
-})
-
-// Calculate dimensions reactively
-const dimensions = computed<GetDimensionsResult | null>(() => {
-    if (!can_calculate.value) {
-        return null
+        return {result: null, error: null}
     }
     try {
-        return service.value.get_dimensions({
-            size: selected_size.value as SizeId,
-            pages: pages.value,
-            binding_type: selected_binding.value as BindingTypeId,
-            paper_type: selected_paper.value as PaperTypeId | undefined,
-            ink_type: selected_ink.value as InkTypeId | undefined,
-            unit: unit.value as UnitType,
-        })
-    } catch {
-        return null
+        return {
+            result: service.value.get_dimensions({
+                size: selected_size.value as SizeId,
+                pages: pages.value,
+                binding_type: selected_binding.value as BindingTypeId,
+                paper_type: selected_paper.value as PaperTypeId | undefined,
+                ink_type: selected_ink.value as InkTypeId | undefined,
+                unit: unit.value as UnitType,
+            }),
+            error: null,
+        }
+    } catch (e) {
+        return {result: null, error: e instanceof Error ? e.message : 'Invalid combination'}
     }
+})
+
+const dimensions = computed(() => calc_result.value.result)
+
+// Warning message explaining why results aren't shown
+const warning = computed<string | null>(() => {
+    if (!selected_binding.value) {
+        if (pages.value && binding_options.value.every(b => b.disabled)) {
+            return 'No binding type supports that number of pages'
+        }
+        return 'Select a binding type'
+    }
+    if (!selected_size.value) {
+        if (binding_options.value.find(b => b.value === selected_binding.value)?.disabled) {
+            return 'Selected binding is not available for this size'
+        }
+        return 'Select a size'
+    }
+    if (!pages.value) {
+        return 'Enter number of pages'
+    }
+    if (service.value.cover_calc_requires_ink && !selected_ink.value) {
+        return 'Select an ink type'
+    }
+    if (service.value.cover_calc_requires_paper && !selected_paper.value) {
+        return 'Select a paper type'
+    }
+    return calc_result.value.error
 })
 </script>
