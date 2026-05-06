@@ -9,4 +9,5 @@ cd "$(dirname "$0")/.."
 
 # Build the docs site
 cd docs
+npm ci  # Mainly for Netlify
 npx nuxt generate
