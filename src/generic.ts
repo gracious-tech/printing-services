@@ -8,7 +8,16 @@ import type {PaperTypeId, InkTypeId, BindingTypeId, GetSizesArgs, GetSizesItem, 
 // Creates a PrintingService from service-specific config
 export function create_service(c:ServiceConfig):ServicePublic {
 
+    // Throws if id is not a key in the named config collection; no-op if id is undefined
+    type ConfigCollection = 'sizes'|'binding_types'|'ink_types'|'paper_types'|'cover_types'
+    function validate_id(collection:ConfigCollection, id:string|undefined):void {
+        if (id !== undefined && !(id in c[collection])){
+            throw new Error(`Invalid id "${id}" for ${collection}`)
+        }
+    }
+
     function get_sizes({binding_type, unit=c.unit}:GetSizesArgs={}):GetSizesItem[]{
+        validate_id('binding_types', binding_type)
         return Object.entries(c.sizes)
             .filter(([id, size]) => !binding_type || !size.excluded_bindings.includes(binding_type))
             .map(([id, size]) => ({
@@ -23,10 +32,13 @@ export function create_service(c:ServiceConfig):ServicePublic {
     }
 
     function get_binding_types({pages, size, ink_type, paper_type}:GetBindingTypesArgs={}):GetBindingTypesItem[]{
+        validate_id('sizes', size)
+        validate_id('ink_types', ink_type)
+        validate_id('paper_types', paper_type)
         return Object.entries(c.binding_types)
             .filter(([id, props]) => {
                 // Exclude bindings not available for selected size
-                if (size && size in c.sizes){
+                if (size){
                     if (c.sizes[size]!.excluded_bindings.includes(id as BindingTypeId)){
                         return false
                     }
@@ -54,6 +66,8 @@ export function create_service(c:ServiceConfig):ServicePublic {
 
     // List available ink types
     function get_ink_types({binding_type, paper_type}:GetInkTypesArgs={}):GetInkTypesItem[]{
+        validate_id('binding_types', binding_type)
+        validate_id('paper_types', paper_type)
         return Object.entries(c.ink_types)
             .filter(([id, props]) => {
                 // Forward: ink excludes certain paper types
@@ -75,6 +89,8 @@ export function create_service(c:ServiceConfig):ServicePublic {
 
     // List available paper types
     function get_paper_types({binding_type, ink_type}:GetPaperTypesArgs={}):GetPaperTypesItem[]{
+        validate_id('binding_types', binding_type)
+        validate_id('ink_types', ink_type)
         return Object.entries(c.paper_types)
             .filter(([id]) => {
                 // Reverse: binding excludes certain paper types
@@ -107,6 +123,11 @@ export function create_service(c:ServiceConfig):ServicePublic {
     }
 
     function get_dimensions(args:GetDimensionsArgs):GetDimensionsResult{
+
+        // Validate all id args
+        validate_id('binding_types', args.binding_type)
+        validate_id('ink_types', args.ink_type)
+        validate_id('paper_types', args.paper_type)
 
         // Get size props from size arg
         let width:Big
