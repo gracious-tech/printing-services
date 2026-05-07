@@ -56,23 +56,25 @@ Each service object has these properties and methods:
 
 ### Service methods
 
-#### `get_sizes({binding_type?, unit?}): GetSizesItem[]`
+All list methods return items with a `valid: boolean` property. By default only valid (compatible) items are returned. Pass `all: true` to include incompatible items with `valid: false` — useful for showing disabled options in a UI.
+
+#### `get_sizes({binding_type?, unit?, all?}): GetSizesItem[]`
 
 List available trim sizes, optionally filtered by binding type.
 
-#### `get_binding_types({pages?, size?, ink_type?, paper_type?}): GetBindingTypesItem[]`
+#### `get_binding_types({pages?, size?, ink_type?, paper_type?, all?}): GetBindingTypesItem[]`
 
 List available binding types, optionally filtered by other selections.
 
-#### `get_ink_types({binding_type?, paper_type?}): GetInkTypesItem[]`
+#### `get_ink_types({binding_type?, paper_type?, all?}): GetInkTypesItem[]`
 
 List available ink types, optionally filtered by binding or paper.
 
-#### `get_paper_types({binding_type?, ink_type?}): GetPaperTypesItem[]`
+#### `get_paper_types({binding_type?, ink_type?, all?}): GetPaperTypesItem[]`
 
 List available paper types, optionally filtered by binding or ink.
 
-#### `get_cover_types(): GetCoverTypesItem[]`
+#### `get_cover_types({all?}): GetCoverTypesItem[]`
 
 List available cover finishes (e.g. glossy, matte).
 

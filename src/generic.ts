@@ -16,10 +16,9 @@ export function create_service(c:ServiceConfig):ServicePublic {
         }
     }
 
-    function get_sizes({binding_type, unit=c.unit}:GetSizesArgs={}):GetSizesItem[]{
+    function get_sizes({binding_type, unit=c.unit, all=false}:GetSizesArgs={}):GetSizesItem[]{
         validate_id('binding_types', binding_type)
         return Object.entries(c.sizes)
-            .filter(([id, size]) => !binding_type || !size.excluded_bindings.includes(binding_type))
             .map(([id, size]) => ({
                 id,
                 name: size.name,
@@ -27,87 +26,82 @@ export function create_service(c:ServiceConfig):ServicePublic {
                 width: convert_unit(size.width, c.unit, unit),
                 height: convert_unit(size.height, c.unit, unit),
                 unit,
+                valid: !binding_type || !size.excluded_bindings.includes(binding_type),
             }))
+            .filter(item => all || item.valid)
             .sort((a, b) => a.width.cmp(b.width) || a.height.cmp(b.height))
     }
 
-    function get_binding_types({pages, size, ink_type, paper_type}:GetBindingTypesArgs={}):GetBindingTypesItem[]{
+    function get_binding_types({pages, size, ink_type, paper_type, all=false}:GetBindingTypesArgs={}):GetBindingTypesItem[]{
         validate_id('sizes', size)
         validate_id('ink_types', ink_type)
         validate_id('paper_types', paper_type)
         return Object.entries(c.binding_types)
-            .filter(([id, props]) => {
-                // Exclude bindings not available for selected size
-                if (size){
-                    if (c.sizes[size]!.excluded_bindings.includes(id as BindingTypeId)){
-                        return false
-                    }
-                }
-                // Exclude bindings outside page range
-                if (pages){
-                    if (pages < props.min_pages || pages > props.max_pages){
-                        return false
-                    }
-                }
+            .map(([id, props]) => {
+                // Check if excluded by selected size
+                const excluded_by_size = size
+                    ? c.sizes[size]!.excluded_bindings.includes(id as BindingTypeId)
+                    : false
+                // Check if outside page range
+                const excluded_by_pages = pages
+                    ? pages < props.min_pages || pages > props.max_pages
+                    : false
                 // Forward: binding excludes certain ink/paper types
-                if (ink_type && props.excluded_ink_types?.includes(ink_type))
-                    return false
-                if (paper_type && props.excluded_paper_types?.includes(paper_type))
-                    return false
-                return true
+                const excluded_by_ink = !!(ink_type && props.excluded_ink_types?.includes(ink_type))
+                const excluded_by_paper = !!(paper_type && props.excluded_paper_types?.includes(paper_type))
+                return {
+                    id,
+                    name: props.name,
+                    expense: props.expense,
+                    valid: !excluded_by_size && !excluded_by_pages && !excluded_by_ink && !excluded_by_paper,
+                }
             })
-            .map(([id, props]) => ({
-                id,
-                name: props.name,
-                expense: props.expense,
-            }))
+            .filter(item => all || item.valid)
             .sort((a, b) => a.expense - b.expense)
     }
 
     // List available ink types
-    function get_ink_types({binding_type, paper_type}:GetInkTypesArgs={}):GetInkTypesItem[]{
+    function get_ink_types({binding_type, paper_type, all=false}:GetInkTypesArgs={}):GetInkTypesItem[]{
         validate_id('binding_types', binding_type)
         validate_id('paper_types', paper_type)
         return Object.entries(c.ink_types)
-            .filter(([id, props]) => {
+            .map(([id, props]) => {
                 // Forward: ink excludes certain paper types
-                if (paper_type && props.excluded_paper_types?.includes(paper_type))
-                    return false
+                const excluded_by_paper = !!(paper_type && props.excluded_paper_types?.includes(paper_type))
                 // Reverse: binding excludes certain ink types
-                if (binding_type && c.binding_types[binding_type]
-                        ?.excluded_ink_types?.includes(id as InkTypeId))
-                    return false
-                return true
+                const excluded_by_binding = !!(binding_type
+                    && c.binding_types[binding_type]?.excluded_ink_types?.includes(id as InkTypeId))
+                return {
+                    id,
+                    name: props.name,
+                    expense: props.expense,
+                    valid: !excluded_by_paper && !excluded_by_binding,
+                }
             })
-            .map(([id, props]) => ({
-                id,
-                name: props.name,
-                expense: props.expense,
-            }))
+            .filter(item => all || item.valid)
             .sort((a, b) => a.expense - b.expense)
     }
 
     // List available paper types
-    function get_paper_types({binding_type, ink_type}:GetPaperTypesArgs={}):GetPaperTypesItem[]{
+    function get_paper_types({binding_type, ink_type, all=false}:GetPaperTypesArgs={}):GetPaperTypesItem[]{
         validate_id('binding_types', binding_type)
         validate_id('ink_types', ink_type)
         return Object.entries(c.paper_types)
-            .filter(([id]) => {
-                // Reverse: binding excludes certain paper types
+            .map(([id, props]) => {
                 const pid = id as PaperTypeId
-                if (binding_type
-                        && c.binding_types[binding_type]?.excluded_paper_types?.includes(pid))
-                    return false
+                // Reverse: binding excludes certain paper types
+                const excluded_by_binding = !!(binding_type
+                    && c.binding_types[binding_type]?.excluded_paper_types?.includes(pid))
                 // Reverse: ink excludes certain paper types
-                if (ink_type && c.ink_types[ink_type]?.excluded_paper_types?.includes(pid))
-                    return false
-                return true
+                const excluded_by_ink = !!(ink_type && c.ink_types[ink_type]?.excluded_paper_types?.includes(pid))
+                return {
+                    id,
+                    name: props.name,
+                    expense: props.expense,
+                    valid: !excluded_by_binding && !excluded_by_ink,
+                }
             })
-            .map(([id, props]) => ({
-                id,
-                name: props.name,
-                expense: props.expense,
-            }))
+            .filter(item => all || item.valid)
             .sort((a, b) => a.expense - b.expense)
     }
 
@@ -118,6 +112,7 @@ export function create_service(c:ServiceConfig):ServicePublic {
                 id,
                 name: props.name,
                 expense: props.expense,
+                valid: true,  // In case add filters in future
             }))
             .sort((a, b) => a.expense - b.expense)
     }

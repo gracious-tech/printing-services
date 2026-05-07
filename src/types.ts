@@ -97,6 +97,7 @@ export interface ServicePublic {
 export interface GetSizesArgs {
     binding_type?:BindingTypeId
     unit?:UnitType
+    all?:boolean
 }
 
 
@@ -107,6 +108,7 @@ export interface GetSizesItem {
     width:Big
     height:Big
     unit:UnitType
+    valid:boolean
 }
 
 export interface GetBindingTypesArgs {
@@ -114,44 +116,51 @@ export interface GetBindingTypesArgs {
     size?:SizeId  // Not allowed to pass custom size here, unlike GetDimensionsArgs
     paper_type?:PaperTypeId
     ink_type?:InkTypeId
+    all?:boolean
 }
 
 export interface GetBindingTypesItem {
     id:string
     name:string
     expense:number
+    valid:boolean
 }
 
 export interface GetPaperTypesArgs {
     binding_type?:BindingTypeId
     ink_type?:InkTypeId
+    all?:boolean
 }
 
 export interface GetPaperTypesItem {
     id:string
     name:string
     expense:number
+    valid:boolean
 }
 
 export interface GetInkTypesArgs {
     binding_type?:BindingTypeId
     paper_type?:PaperTypeId
+    all?:boolean
 }
 
 export interface GetInkTypesItem {
     id:string
     name:string
     expense:number
+    valid:boolean
 }
 
 export interface GetCoverTypesArgs {
-    // Cover type is never filtered by other options
+    all?:boolean
 }
 
 export interface GetCoverTypesItem {
     id:string
     name:string
     expense:number
+    valid:boolean
 }
 
 export interface CustomSize {
