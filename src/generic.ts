@@ -2,7 +2,18 @@
 import Big from 'big.js'
 import {convert_unit} from './utils.js'
 
-import type {PaperTypeId, InkTypeId, BindingTypeId, GetSizesArgs, GetSizesItem, GetBindingTypesArgs, GetBindingTypesItem, GetPaperTypesArgs, GetPaperTypesItem, GetInkTypesArgs, GetInkTypesItem, GetCoverTypesArgs, GetCoverTypesItem, GetDimensionsArgs, GetDimensionsResult, ServiceConfig, ServicePublic, CalcArgs, CoverTypeId, ServiceConfigCoverType} from './types.js'
+import type {UnitType, PaperTypeId, InkTypeId, BindingTypeId, GetSizesArgs, GetSizesItem, GetBindingTypesArgs, GetBindingTypesItem, GetPaperTypesArgs, GetPaperTypesItem, GetInkTypesArgs, GetInkTypesItem, GetCoverTypesItem, GetDimensionsArgs, GetDimensionsResult, ServiceConfig, ServicePublic, CalcArgs, CoverTypeId, ServiceConfigCoverType} from './types.js'
+
+
+// Creates a function that converts unit then optionally converts Big to number or string
+function make_converter(old_unit:UnitType, new_unit:UnitType, numbers:'Big'|'string'|'number'){
+    return (amount:Big):Big|number|string => {
+        const v = convert_unit(amount, old_unit, new_unit)
+        if (numbers === 'number') return v.toNumber()
+        if (numbers === 'string') return v.round(3).toString()  // Use Big if not enough precision
+        return v
+    }
+}
 
 
 // Creates a PrintingService from service-specific config
@@ -16,20 +27,25 @@ export function create_service(c:ServiceConfig):ServicePublic {
         }
     }
 
-    function get_sizes({binding_type, unit=c.unit, all=false}:GetSizesArgs={}):GetSizesItem[]{
+    function get_sizes(args?:GetSizesArgs & {numbers:'number'}):GetSizesItem<number>[]
+    function get_sizes(args?:GetSizesArgs & {numbers:'string'}):GetSizesItem<string>[]
+    function get_sizes(args?:GetSizesArgs):GetSizesItem[]
+    function get_sizes({binding_type, unit=c.unit, all=false, numbers='Big'}:GetSizesArgs={})
+            :GetSizesItem<unknown>[]{
         validate_id('binding_types', binding_type)
+        const convert = make_converter(c.unit, unit, numbers)
         return Object.entries(c.sizes)
+            .sort(([, a], [, b]) => a.width.cmp(b.width) || a.height.cmp(b.height))
             .map(([id, size]) => ({
                 id,
                 name: size.name,
                 expense: size.expense,
-                width: convert_unit(size.width, c.unit, unit),
-                height: convert_unit(size.height, c.unit, unit),
+                width: convert(size.width),
+                height: convert(size.height),
                 unit,
                 valid: !binding_type || !size.excluded_bindings.includes(binding_type),
             }))
             .filter(item => all || item.valid)
-            .sort((a, b) => a.width.cmp(b.width) || a.height.cmp(b.height))
     }
 
     function get_binding_types({pages, size, ink_type, paper_type, all=false}:GetBindingTypesArgs={}):GetBindingTypesItem[]{
@@ -117,7 +133,10 @@ export function create_service(c:ServiceConfig):ServicePublic {
             .sort((a, b) => a.expense - b.expense)
     }
 
-    function get_dimensions(args:GetDimensionsArgs):GetDimensionsResult{
+    function get_dimensions(args:GetDimensionsArgs & {numbers:'number'}):GetDimensionsResult<number>
+    function get_dimensions(args:GetDimensionsArgs & {numbers:'string'}):GetDimensionsResult<string>
+    function get_dimensions(args:GetDimensionsArgs):GetDimensionsResult
+    function get_dimensions(args:GetDimensionsArgs):GetDimensionsResult<unknown>{
 
         // Validate all id args
         validate_id('binding_types', args.binding_type)
@@ -194,9 +213,7 @@ export function create_service(c:ServiceConfig):ServicePublic {
         const interior_blank_pages = (4 - (args.pages + 2) % 4) % 4
 
         const result_unit = args.unit ?? c.unit
-        function convert(amount:Big|string){
-            return convert_unit(amount, c.unit, result_unit)
-        }
+        const convert = make_converter(c.unit, result_unit, args.numbers ?? 'Big')
 
         return {
             unit: result_unit,

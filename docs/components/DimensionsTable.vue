@@ -13,7 +13,7 @@ div.space-y-6
                         td.py-2.pr-4.font-mono.text-xs.text-(--color-text-muted).whitespace-nowrap
                             | {{ row.key }}
                         td.py-2.pr-4.text-right.tabular-nums.whitespace-nowrap
-                            | {{ format_big(row.value) }} {{ dims.unit }}
+                            | {{ row.value }} {{ dims.unit }}
                         td.py-2.text-(--color-text-muted).hidden(class='md:table-cell') {{ row.desc }}
 
     //- Cover dimensions section
@@ -28,7 +28,7 @@ div.space-y-6
                         td.py-2.pr-4.font-mono.text-xs.text-(--color-text-muted).whitespace-nowrap
                             | {{ row.key }}
                         td.py-2.pr-4.text-right.tabular-nums.whitespace-nowrap
-                            | {{ format_big(row.value) }} {{ dims.unit }}
+                            | {{ row.value }} {{ dims.unit }}
                         td.py-2.text-(--color-text-muted).hidden(class='md:table-cell') {{ row.desc }}
 
     //- Cover regions section
@@ -48,10 +48,10 @@ div.space-y-6
                     tr(v-for='row in region_rows' :key='row.label'
                         class='border-t border-(--color-border)')
                         td.py-2.pr-4.font-medium {{ row.label }}
-                        td.py-2.pr-4.text-right.tabular-nums {{ format_big(row.region.x) }}
-                        td.py-2.pr-4.text-right.tabular-nums {{ format_big(row.region.y) }}
-                        td.py-2.pr-4.text-right.tabular-nums {{ format_big(row.region.w) }}
-                        td.py-2.text-right.tabular-nums {{ format_big(row.region.h) }}
+                        td.py-2.pr-4.text-right.tabular-nums {{ row.region.x }}
+                        td.py-2.pr-4.text-right.tabular-nums {{ row.region.y }}
+                        td.py-2.pr-4.text-right.tabular-nums {{ row.region.w }}
+                        td.py-2.text-right.tabular-nums {{ row.region.h }}
 
     //- Metadata section
     UCard
@@ -73,17 +73,8 @@ div.space-y-6
 import type {GetDimensionsResult} from 'printing-services'
 
 const props = defineProps<{
-    dims:GetDimensionsResult
+    dims:GetDimensionsResult<string>
 }>()
-
-// Format a Big value for display
-function format_big(val:unknown):string {
-    if (val && typeof val === 'object' && 'round' in val) {
-        const v = val as {round:(n:number) => {toString:() => string}}
-        return v.round(3).toString()  // Lulu uses 3 for both inches and mm precision
-    }
-    return String(val)
-}
 
 // Metadata rows (non-numeric properties)
 const metadata_rows = computed(() => [

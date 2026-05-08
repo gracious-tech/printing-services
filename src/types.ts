@@ -78,12 +78,16 @@ export interface ServicePublic {
     countries:null|string[]
     quality:number
     expense:ExpenseRatings
-    get_sizes:(args?:GetSizesArgs) => GetSizesItem[]
+    get_sizes(args?:GetSizesArgs & {numbers:'number'}):GetSizesItem<number>[]
+    get_sizes(args?:GetSizesArgs & {numbers:'string'}):GetSizesItem<string>[]
+    get_sizes(args?:GetSizesArgs):GetSizesItem[]
     get_binding_types:(args?:GetBindingTypesArgs) => GetBindingTypesItem[]
     get_ink_types:(args?:GetInkTypesArgs) => GetInkTypesItem[]
     get_paper_types:(args?:GetPaperTypesArgs) => GetPaperTypesItem[]
     get_cover_types:(args?:GetCoverTypesArgs) => GetCoverTypesItem[]
-    get_dimensions:(args:GetDimensionsArgs) => GetDimensionsResult
+    get_dimensions(args:GetDimensionsArgs & {numbers:'number'}):GetDimensionsResult<number>
+    get_dimensions(args:GetDimensionsArgs & {numbers:'string'}):GetDimensionsResult<string>
+    get_dimensions(args:GetDimensionsArgs):GetDimensionsResult
     interior_calc_requires_binding:boolean
     cover_calc_requires_binding:boolean
     cover_calc_requires_paper:boolean
@@ -98,15 +102,16 @@ export interface GetSizesArgs {
     binding_type?:BindingTypeId
     unit?:UnitType
     all?:boolean
+    numbers?:'Big'|'string'|'number'
 }
 
 
-export interface GetSizesItem {
+export interface GetSizesItem<N = Big> {
     id:string
     name:string
     expense:number
-    width:Big
-    height:Big
+    width:N
+    height:N
     unit:UnitType
     valid:boolean
 }
@@ -176,46 +181,47 @@ export interface GetDimensionsArgs {
     paper_type?:PaperTypeId
     ink_type?:InkTypeId
     unit?:UnitType
+    numbers?:'Big'|'string'|'number'
 }
 
-export interface Region {
-    x:Big
-    y:Big
-    w:Big
-    h:Big
+export interface Region<N = Big> {
+    x:N
+    y:N
+    w:N
+    h:N
 }
 
-export interface GetDimensionsResult {
+export interface GetDimensionsResult<N = Big> {
     unit:UnitType
 
-    interior_bleed:Big
-    interior_margin:Big
-    interior_gutter:Big
+    interior_bleed:N
+    interior_margin:N
+    interior_gutter:N
 
-    interior_safe_width:Big
-    interior_safe_height:Big
-    interior_trim_width:Big
-    interior_trim_height:Big
-    interior_total_width:Big
-    interior_total_height:Big
+    interior_safe_width:N
+    interior_safe_height:N
+    interior_trim_width:N
+    interior_trim_height:N
+    interior_total_width:N
+    interior_total_height:N
 
-    cover_bleed:Big
-    cover_margin:Big
-    cover_spine:Big
-    cover_spine_margin:Big
+    cover_bleed:N
+    cover_margin:N
+    cover_spine:N
+    cover_spine_margin:N
 
-    cover_face_width:Big
-    cover_face_height:Big
-    cover_safe_width:Big
-    cover_safe_height:Big
-    cover_trim_width:Big
-    cover_trim_height:Big
-    cover_total_width:Big
-    cover_total_height:Big
+    cover_face_width:N
+    cover_face_height:N
+    cover_safe_width:N
+    cover_safe_height:N
+    cover_trim_width:N
+    cover_trim_height:N
+    cover_total_width:N
+    cover_total_height:N
 
-    cover_region_back:Region
-    cover_region_spine:Region
-    cover_region_front:Region
+    cover_region_back:Region<N>
+    cover_region_spine:Region<N>
+    cover_region_front:Region<N>
 
     interior_includes_cover:boolean
     interior_blank_pages:number  // Num pages to add before backcover when `interior_has_cover` true

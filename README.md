@@ -56,13 +56,14 @@ const dimensions = kdp.get_dimensions({
     paper_type: 'white',
     ink_type: 'bw',
     unit: 'inch',  // Can be 'mm'
+    numbers: 'Big',  // Can be 'number' or 'string'
 })
 ```
 
 
 ### Result of `get_dimensions` example above
 
-Numeric values are decimal objects ([big.js](https://www.npmjs.com/package/big.js)) to avoid floating point imprecision in mm/inch math. Use `.toNumber()` or `.toFixed()` to convert them.
+Numeric values are decimal objects ([big.js](https://www.npmjs.com/package/big.js)) to avoid floating point imprecision in mm/inch math. Use `numbers: 'number'` or `numbers: 'string'` to get regular JS values.
 
 ```js
 const dimensions = {

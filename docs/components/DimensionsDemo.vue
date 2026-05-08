@@ -253,6 +253,7 @@ const calc_result = computed<{result:GetDimensionsResult | null, error:string | 
                 paper_type: selected_paper.value as PaperTypeId | undefined,
                 ink_type: selected_ink.value as InkTypeId | undefined,
                 unit: unit.value as UnitType,
+                numbers: 'string',
             }),
             error: null,
         }

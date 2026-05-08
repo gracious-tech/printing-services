@@ -58,7 +58,7 @@ Each service object has these properties and methods:
 
 All list methods return items with a `valid: boolean` property. By default only valid (compatible) items are returned. Pass `all: true` to include incompatible items with `valid: false` — useful for showing disabled options in a UI.
 
-#### `get_sizes({binding_type?, unit?, all?}): GetSizesItem[]`
+#### `get_sizes({binding_type?, unit?, all?, numbers?}): GetSizesItem[]`
 
 List available trim sizes, optionally filtered by binding type.
 
@@ -82,17 +82,6 @@ List available cover finishes (e.g. glossy, matte).
 
 Calculate all dimensions for a specific book configuration. This is the main method.
 
-```ts
-const dims = kdp.get_dimensions({
-    size: 'us_trade',       // SizeId or CustomSize
-    pages: 300,             // Total interior page count
-    binding_type: 'paperback',
-    paper_type: 'white',    // Optional for some services
-    ink_type: 'bw',         // Optional for some services
-    unit: 'inch',           // Optional, defaults to service's native unit
-})
-```
-
 **Arguments:**
 
 | Argument | Type | Required | Description |
@@ -103,6 +92,7 @@ const dims = kdp.get_dimensions({
 | `paper_type` | `PaperTypeId` | Depends | Required when `cover_calc_requires_paper` is true |
 | `ink_type` | `InkTypeId` | Depends | Required when `cover_calc_requires_ink` is true |
 | `unit` | `UnitType` | No | Output unit (`'inch'` or `'mm'`). Defaults to service's native unit |
+| `numbers` | `'Big' \| 'number' \| 'string'` | No | Format of numeric values in result. Defaults to `'Big'` |
 
 ### CustomSize
 
@@ -119,7 +109,7 @@ Use instead of a `SizeId` when the service supports custom trim sizes.
 
 ## GetDimensionsResult
 
-All numeric values are `Big` instances (from the `big.js` library) for precision. Call `.toNumber()` or `.toString()` to convert.
+Numeric values are decimal objects ([big.js](https://www.npmjs.com/package/big.js)) to avoid floating point imprecision in mm/inch math. Use `numbers: 'number'` or `numbers: 'string'` to get regular JS values.
 
 
 ### Metadata
