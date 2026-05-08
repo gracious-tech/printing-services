@@ -9,8 +9,12 @@ import type {UnitType, PaperTypeId, InkTypeId, BindingTypeId, GetSizesArgs, GetS
 function make_converter(old_unit:UnitType, new_unit:UnitType, numbers:'Big'|'string'|'number'){
     return (amount:Big):Big|number|string => {
         const v = convert_unit(amount, old_unit, new_unit)
-        if (numbers === 'number') return v.toNumber()
-        if (numbers === 'string') return v.round(3).toString()  // Use Big if not enough precision
+        if (numbers === 'number')
+            return v.toNumber()
+        // When not doing calculations like spine width...
+        //    exceeding 3 decimal places for inches, or 2 for mm, is not necessary
+        if (numbers === 'string')
+            return v.round(new_unit === 'inch' ? 3 : 2).toString()
         return v
     }
 }
