@@ -14,7 +14,7 @@ div.space-y-6
                             | {{ row.key }}
                         td.py-2.pr-4.text-right.tabular-nums.whitespace-nowrap
                             | {{ row.value }} {{ dims.unit }}
-                        td.py-2.text-(--color-text-muted).hidden(class='md:table-cell') {{ row.desc }}
+                        td(class='py-2 text-(--color-text-muted) hidden md:table-cell') {{ row.desc }}
 
     //- Cover dimensions section
     UCard
@@ -29,7 +29,7 @@ div.space-y-6
                             | {{ row.key }}
                         td.py-2.pr-4.text-right.tabular-nums.whitespace-nowrap
                             | {{ row.value }} {{ dims.unit }}
-                        td.py-2.text-(--color-text-muted).hidden(class='md:table-cell') {{ row.desc }}
+                        td(class='py-2 text-(--color-text-muted) hidden md:table-cell') {{ row.desc }}
 
     //- Cover regions section
     UCard
@@ -65,7 +65,7 @@ div.space-y-6
                         td.py-2.pr-4.font-mono.text-xs.text-(--color-text-muted).whitespace-nowrap
                             | {{ row.key }}
                         td.py-2.pr-4 {{ row.value }}
-                        td.py-2.text-(--color-text-muted).hidden(class='md:table-cell') {{ row.desc }}
+                        td(class='py-2 text-(--color-text-muted) hidden md:table-cell') {{ row.desc }}
 
 </template>
 

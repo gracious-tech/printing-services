@@ -133,52 +133,53 @@ const service_options = computed(() => {
 
 // Build options with disabled state for invalid combinations
 const size_options = computed(() => {
-    const valid = new Set(service.value.get_sizes({
+    return service.value.get_sizes({
         binding_type: selected_binding.value as BindingTypeId | undefined,
         unit: unit.value as UnitType,
-    }).map(s => s.id))
-    return service.value.get_sizes({unit: unit.value as UnitType}).map(s => ({
-        label: `${s.name} (${s.width.round(3)}\u00D7${s.height.round(3)})`,
+        numbers: 'string',
+        all: true,
+    }).map(s => ({
+        label: `${s.name} (${s.width}\u00D7${s.height})`,
         value: s.id,
-        disabled: !valid.has(s.id),
+        disabled: !s.valid,
     }))
 })
 
 const binding_options = computed(() => {
-    const valid = new Set(service.value.get_binding_types({
+    return service.value.get_binding_types({
         pages: pages.value,
         size: selected_size.value as SizeId | undefined,
         ink_type: selected_ink.value as InkTypeId | undefined,
         paper_type: selected_paper.value as PaperTypeId | undefined,
-    }).map(b => b.id))
-    return service.value.get_binding_types().map(b => ({
+        all: true,
+    }).map(b => ({
         label: b.name,
         value: b.id,
-        disabled: !valid.has(b.id),
+        disabled: !b.valid,
     }))
 })
 
 const ink_options = computed(() => {
-    const valid = new Set(service.value.get_ink_types({
+    return service.value.get_ink_types({
         binding_type: selected_binding.value as BindingTypeId | undefined,
         paper_type: selected_paper.value as PaperTypeId | undefined,
-    }).map(i => i.id))
-    return service.value.get_ink_types().map(i => ({
+        all: true,
+    }).map(i => ({
         label: i.name,
         value: i.id,
-        disabled: !valid.has(i.id),
+        disabled: !i.valid,
     }))
 })
 
 const paper_options = computed(() => {
-    const valid = new Set(service.value.get_paper_types({
+    return service.value.get_paper_types({
         binding_type: selected_binding.value as BindingTypeId | undefined,
         ink_type: selected_ink.value as InkTypeId | undefined,
-    }).map(p => p.id))
-    return service.value.get_paper_types().map(p => ({
+        all: true,
+    }).map(p => ({
         label: p.name,
         value: p.id,
-        disabled: !valid.has(p.id),
+        disabled: !p.valid,
     }))
 })
 
@@ -234,7 +235,7 @@ watch(size_options, (list) => {
 }, {immediate: true})
 
 // Calculate dimensions and capture any error
-const calc_result = computed<{result:GetDimensionsResult | null, error:string | null}>(() => {
+const calc_result = computed<{result:GetDimensionsResult<string> | null, error:string | null}>(() => {
     if (!selected_size.value || !selected_binding.value || !pages.value) {
         return {result: null, error: null}
     }
