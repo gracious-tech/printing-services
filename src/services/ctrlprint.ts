@@ -157,6 +157,7 @@ export default create_service({
     calc_cover_flap: () => Big(0),
     calc_cover_overhang_width: () => Big(0),
     calc_cover_overhang_height: () => Big(0),
+    calc_cover_barcode: () => undefined,
 
     url_website: 'https://ctrlprint.com.au/',
     url_guide: 'https://ctrlprint.com.au/wp-content/uploads/2025/01/Artwork-Guidelines-Ctrl-Print.pdf',

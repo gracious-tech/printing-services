@@ -5,7 +5,8 @@ import Big from 'big.js'
 import {create_service, GLOSSY_MATTE_COVER_TYPES} from '../generic.js'
 import {generate_sizes} from '../sizes.js'
 
-import type {ServiceConfigSize, ServiceConfigBindingType, ServiceConfigPaperType, ServiceConfigInkType, ServiceConfigCoverType, BindingTypeId, SizeId, PaperTypeId, InkTypeId, CoverTypeId, CalcArgs} from '../types.js'
+import type {ServiceConfigBindingType, ServiceConfigPaperType, ServiceConfigInkType, BindingTypeId,
+    PaperTypeId, InkTypeId, CalcArgs} from '../types.js'
 
 
 const SIZES = generate_sizes('inch', {
@@ -165,6 +166,23 @@ export function calc_cover_spine({pages, binding_type, paper_type, ink_type}:Cal
 }
 
 
+export function calc_cover_barcode({binding_type}:CalcArgs){
+    // These margins are calculated relative to the face edge (ignores usual safe margin)
+    let margin_right = Big('0.25')
+    let margin_bottom = Big('0.125').plus('0.25')
+    if (binding_type === 'hardcover'){
+        margin_right = Big('0.394').plus('0.25')
+        margin_bottom = Big('0.125').plus('0.375')
+    }
+    return {
+        w: Big('2'),
+        h: Big('1.2'),
+        margin_right,
+        margin_bottom,
+    }
+}
+
+
 export default create_service({
     id: 'kdp',
     name: "Kindle Direct Publishing",
@@ -213,6 +231,7 @@ export default create_service({
     calc_cover_flap: () => Big(0),
     calc_cover_overhang_width: ({binding_type}) => Big(binding_type === 'paperback' ? 0 : '0.197'),
     calc_cover_overhang_height: ({binding_type}) => Big(binding_type === 'paperback' ? 0 : '0.236'),
+    calc_cover_barcode,
 
     url_website: 'https://kdp.amazon.com',
     url_guide: 'https://kdp.amazon.com/cover-calculator',

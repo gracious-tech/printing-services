@@ -308,6 +308,12 @@ export default create_service({
     calc_cover_flap,
     calc_cover_overhang_width,
     calc_cover_overhang_height,
+    calc_cover_barcode: () => ({
+        // They give different dimensions elsewhere but here they say it's same as KDP
+        // https://help.lulu.com/en/support/solutions/articles/64000255462-mandatory-print-book-distribution-requirements
+        w: Big('2'),
+        h: Big('1.2'),
+    }),
 
     url_website: 'https://www.lulu.com',
     url_guide: 'https://assets.lulu.com/media/guides/en/lulu-book-creation-guide.pdf',

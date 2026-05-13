@@ -185,8 +185,8 @@ export interface GetDimensionsArgs {
 }
 
 export interface Region<N = Big> {
-    x:N
-    y:N
+    x:N  // From left
+    y:N  // From bottom
     w:N
     h:N
 }
@@ -222,6 +222,7 @@ export interface GetDimensionsResult<N = Big> {
     cover_region_back:Region<N>
     cover_region_spine:Region<N>
     cover_region_front:Region<N>
+    cover_region_barcode:Region<N>
 
     interior_includes_cover:boolean
     interior_blank_pages:number  // Num pages to add before backcover when `interior_has_cover` true
@@ -287,6 +288,13 @@ export interface ServiceConfigCoverType {
     expense:number
 }
 
+export interface ServiceConfigBarcode {
+    w:Big
+    h:Big
+    margin_right?:Big  // If different to standard cover_margin
+    margin_bottom?:Big  // If different to standard cover_margin
+}
+
 export interface ServiceConfig {
     id:string
     name:string
@@ -321,6 +329,7 @@ export interface ServiceConfig {
     calc_cover_flap(args:CalcArgs):Big
     calc_cover_overhang_width(args:CalcArgs):Big
     calc_cover_overhang_height(args:CalcArgs):Big
+    calc_cover_barcode(args:CalcArgs):ServiceConfigBarcode|undefined
 
     url_website:string
     url_guide:string

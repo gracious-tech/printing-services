@@ -151,5 +151,6 @@ const region_rows = computed(() => [
     {label: 'Back', region: props.dims.cover_region_back},
     {label: 'Spine', region: props.dims.cover_region_spine},
     {label: 'Front', region: props.dims.cover_region_front},
+    {label: 'Barcode', region: props.dims.cover_region_barcode},
 ])
 </script>

@@ -110,6 +110,12 @@ const dimensions = {
         w: Big('6'),
         h: Big('9')
     },
+    cover_region_barcode: {
+        x: Big('3.875'),
+        y: Big('0.5'),
+        w: Big('2'),
+        h: Big('1.2')
+    },
 
     interior_includes_cover: false,
     interior_blank_pages: 0,

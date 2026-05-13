@@ -191,5 +191,6 @@ Regions describe the position and size of each cover face within the full docume
 | `cover_region_back` | `Region` | Position of the back cover face within the full document |
 | `cover_region_spine` | `Region` | Position of the spine within the full document |
 | `cover_region_front` | `Region` | Position of the front cover face within the full document |
+| `cover_region_barcode` | `Region` | Position of the barcode within the full document |
 
-Each `Region` has `{x, y, w, h}` — the top-left origin and dimensions of that section, measured from the top-left corner of the full cover document.
+Each `Region` has `{x, y, w, h}` — the bottom-left origin and dimensions of that section, with `x` measured from the left and `y` measured from the bottom of the full cover document.

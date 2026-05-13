@@ -2,7 +2,7 @@
 import Big from 'big.js'
 import {convert_unit} from './utils.js'
 
-import type {UnitType, PaperTypeId, InkTypeId, BindingTypeId, GetSizesArgs, GetSizesItem, GetBindingTypesArgs, GetBindingTypesItem, GetPaperTypesArgs, GetPaperTypesItem, GetInkTypesArgs, GetInkTypesItem, GetCoverTypesItem, GetDimensionsArgs, GetDimensionsResult, ServiceConfig, ServicePublic, CalcArgs, CoverTypeId, ServiceConfigCoverType} from './types.js'
+import type {UnitType, PaperTypeId, InkTypeId, BindingTypeId, GetSizesArgs, GetSizesItem, GetBindingTypesArgs, GetBindingTypesItem, GetPaperTypesArgs, GetPaperTypesItem, GetInkTypesArgs, GetInkTypesItem, GetCoverTypesItem, GetDimensionsArgs, GetDimensionsResult, ServiceConfig, ServicePublic, CalcArgs, CoverTypeId, ServiceConfigCoverType, ServiceConfigBarcode} from './types.js'
 
 
 // Creates a function that converts unit then optionally converts Big to number or string
@@ -16,6 +16,16 @@ function make_converter(old_unit:UnitType, new_unit:UnitType, numbers:'Big'|'str
         if (numbers === 'string')
             return v.round(new_unit === 'inch' ? 3 : 2).toString()
         return v
+    }
+}
+
+
+// Return a default barcode size/position when services don't specify it
+function get_default_barcode(unit:UnitType):ServiceConfigBarcode{
+    return {
+        // Same size as KDP and Lulu
+        w: convert_unit(Big('2'), 'inch', unit),
+        h: convert_unit(Big('1.2'), 'inch', unit),
     }
 }
 
@@ -186,6 +196,7 @@ export function create_service(c:ServiceConfig):ServicePublic {
         const cover_flap = c.calc_cover_flap(calc_args)
         const cover_overhang_width = c.calc_cover_overhang_width(calc_args)
         const cover_overhang_height = c.calc_cover_overhang_height(calc_args)
+        const cover_barcode = c.calc_cover_barcode(calc_args) ?? get_default_barcode(c.unit)
 
         // Interior totals
         const interior_trim_width = width
@@ -213,9 +224,20 @@ export function create_service(c:ServiceConfig):ServicePublic {
         const cover_x_spine = cover_x_back.plus(cover_face_width)
         const cover_x_front = cover_x_spine.plus(cover_spine)
 
+        // Work out position of barcode
+        let barcode_x = cover_x_spine.minus(cover_margin).minus(cover_barcode.w)
+        let barcode_y = cover_bleed.plus(cover_margin)
+        if (cover_barcode.margin_right){
+            barcode_x = cover_x_spine.minus(cover_barcode.margin_right).minus(cover_barcode.w)
+        }
+        if (cover_barcode.margin_bottom){
+            barcode_y = cover_bleed.plus(cover_barcode.margin_bottom)
+        }
+
         // How many more pages needed to ensure interior a multiple of 4 if cover pages included
         const interior_blank_pages = (4 - (args.pages + 2) % 4) % 4
 
+        // Prepare convert helper
         const result_unit = args.unit ?? c.unit
         const convert = make_converter(c.unit, result_unit, args.numbers ?? 'Big')
 
@@ -264,6 +286,12 @@ export function create_service(c:ServiceConfig):ServicePublic {
                 y: convert(cover_bleed),
                 w: convert(cover_face_width),
                 h: convert(cover_face_height),
+            },
+            cover_region_barcode: {
+                x: convert(barcode_x),
+                y: convert(barcode_y),
+                w: convert(cover_barcode.w),
+                h: convert(cover_barcode.h),
             },
 
             interior_includes_cover: c.interior_includes_cover,
@@ -336,5 +364,6 @@ export function generate_simple_inline_cover_options({bleed, margin}:{bleed:stri
         calc_cover_flap: () => Big(0),
         calc_cover_overhang_width: () => Big(0),
         calc_cover_overhang_height: () => Big(0),
+        calc_cover_barcode: () => undefined,
     }
 }
