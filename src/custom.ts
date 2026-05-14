@@ -39,7 +39,10 @@ export function get_custom_dimensions(args:GetCustomDimensionsArgs):GetDimension
 
         unit: args.unit,
         sizes: {},
-        binding_types: {},
+        binding_types: {
+            // This is just needed to call get_dimensions without error
+            paperback: {name: "Paperback", min_pages: 0, max_pages: Infinity, expense: 1},
+        },
         paper_types: {},
         ink_types: {},
         cover_types: {},
