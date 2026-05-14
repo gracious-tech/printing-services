@@ -1,8 +1,9 @@
 
 import Big from 'big.js'
 import {convert_unit} from './utils.js'
+import {SIZES} from './sizes.js'
 
-import type {UnitType, PaperTypeId, InkTypeId, BindingTypeId, GetSizesArgs, GetSizesItem, GetBindingTypesArgs, GetBindingTypesItem, GetPaperTypesArgs, GetPaperTypesItem, GetInkTypesArgs, GetInkTypesItem, GetCoverTypesItem, GetDimensionsArgs, GetDimensionsResult, ServiceConfig, ServicePublic, CalcArgs, CoverTypeId, ServiceConfigCoverType, ServiceConfigBarcode} from './types.js'
+import type {UnitType, PaperTypeId, InkTypeId, BindingTypeId, GetSizesArgs, GetSizesItem, GetBindingTypesArgs, GetBindingTypesItem, GetPaperTypesArgs, GetPaperTypesItem, GetInkTypesArgs, GetInkTypesItem, GetCoverTypesItem, GetDimensionsArgs, GetDimensionsResult, ServiceConfig, ServicePublic, CalcArgs, CoverTypeId, ServiceConfigCoverType, ServiceConfigBarcode, GetCommonSizesArgs, GetCommonSizesItem} from './types.js'
 
 
 // Creates a function that converts unit then optionally converts Big to number or string
@@ -27,6 +28,30 @@ function get_default_barcode(unit:UnitType):ServiceConfigBarcode{
         w: convert_unit(Big('2'), 'inch', unit),
         h: convert_unit(Big('1.2'), 'inch', unit),
     }
+}
+
+
+// Get common book sizes
+export function get_common_sizes(args?:GetCommonSizesArgs & {numbers:'number'})
+    :GetCommonSizesItem<number>[]
+export function get_common_sizes(args?:GetCommonSizesArgs & {numbers:'string'})
+    :GetCommonSizesItem<string>[]
+export function get_common_sizes(args?:GetCommonSizesArgs):GetCommonSizesItem[]
+export function get_common_sizes({unit, numbers='Big'}:GetCommonSizesArgs={})
+        :GetCommonSizesItem<unknown>[]{
+    return Object.entries(SIZES)
+        .map(([id, size]) => {
+            const result_unit = unit ?? size.unit  // Default to keeping size's unit
+            const convert = make_converter(size.unit, result_unit, numbers)
+            return {
+                id,
+                name: size.name,
+                width: convert(size.width),
+                height: convert(size.height),
+                unit: result_unit,
+            }
+        })
+        .sort((a, b) => Big(a.width).cmp(b.width) || Big(a.height).cmp(b.height))
 }
 
 

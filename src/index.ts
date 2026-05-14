@@ -8,6 +8,7 @@ import ctrlprint from './services/ctrlprint.js'
 import type {ServicePublic} from './types.js'
 
 export type * from './types.js'
+export {get_common_sizes} from './generic.js'
 
 
 // WARN make sure these are named the same as their ids

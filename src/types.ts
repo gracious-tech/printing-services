@@ -335,3 +335,23 @@ export interface ServiceConfig {
     url_guide:string
     url_pricing:string
 }
+
+
+export interface GetCommonSizesArgs {
+    unit?:UnitType
+    numbers?:'Big'|'string'|'number'
+}
+
+export interface GetCommonSizesItem<N = Big> {
+    id:string
+    name:string
+    width:N
+    height:N
+    unit:UnitType
+}
+
+export interface GetCustomDimensionsArgs {
+    size:SizeId|CustomSize
+    unit?:UnitType
+    numbers?:'Big'|'string'|'number'
+}

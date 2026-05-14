@@ -5,7 +5,7 @@ import {convert_unit} from './utils.js'
 
 
 // Standard sizes that should be in their native unit
-const SIZES:Record<SizeId, {name:string, unit:UnitType, width:Big, height:Big}> = {
+export const SIZES:Record<SizeId, {name:string, unit:UnitType, width:Big, height:Big}> = {
     pocket_book: {
         name: "Pocket Book",
         unit: 'inch',
