@@ -32,9 +32,9 @@ function get_default_barcode(unit:UnitType):ServiceConfigBarcode{
 
 
 // Get common book sizes
-export function get_common_sizes(args?:GetCommonSizesArgs & {numbers:'number'})
+export function get_common_sizes(args:GetCommonSizesArgs & {numbers:'number'})
     :GetCommonSizesItem<number>[]
-export function get_common_sizes(args?:GetCommonSizesArgs & {numbers:'string'})
+export function get_common_sizes(args:GetCommonSizesArgs & {numbers:'string'})
     :GetCommonSizesItem<string>[]
 export function get_common_sizes(args?:GetCommonSizesArgs):GetCommonSizesItem[]
 export function get_common_sizes({unit, numbers='Big'}:GetCommonSizesArgs={})
@@ -66,8 +66,8 @@ export function create_service(c:ServiceConfig):ServicePublic {
         }
     }
 
-    function get_sizes(args?:GetSizesArgs & {numbers:'number'}):GetSizesItem<number>[]
-    function get_sizes(args?:GetSizesArgs & {numbers:'string'}):GetSizesItem<string>[]
+    function get_sizes(args:GetSizesArgs & {numbers:'number'}):GetSizesItem<number>[]
+    function get_sizes(args:GetSizesArgs & {numbers:'string'}):GetSizesItem<string>[]
     function get_sizes(args?:GetSizesArgs):GetSizesItem[]
     function get_sizes({binding_type, unit=c.unit, all=false, numbers='Big'}:GetSizesArgs={})
             :GetSizesItem<unknown>[]{

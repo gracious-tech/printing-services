@@ -78,8 +78,8 @@ export interface ServicePublic {
     countries:null|string[]
     quality:number
     expense:ExpenseRatings
-    get_sizes(args?:GetSizesArgs & {numbers:'number'}):GetSizesItem<number>[]
-    get_sizes(args?:GetSizesArgs & {numbers:'string'}):GetSizesItem<string>[]
+    get_sizes(args:GetSizesArgs & {numbers:'number'}):GetSizesItem<number>[]
+    get_sizes(args:GetSizesArgs & {numbers:'string'}):GetSizesItem<string>[]
     get_sizes(args?:GetSizesArgs):GetSizesItem[]
     get_binding_types:(args?:GetBindingTypesArgs) => GetBindingTypesItem[]
     get_ink_types:(args?:GetInkTypesArgs) => GetInkTypesItem[]
