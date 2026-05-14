@@ -9,6 +9,7 @@ import type {ServicePublic} from './types.js'
 
 export type * from './types.js'
 export {get_common_sizes} from './generic.js'
+export {get_custom_dimensions} from './custom.js'
 
 
 // WARN make sure these are named the same as their ids

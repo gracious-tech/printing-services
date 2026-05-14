@@ -351,7 +351,13 @@ export interface GetCommonSizesItem<N = Big> {
 }
 
 export interface GetCustomDimensionsArgs {
-    size:SizeId|CustomSize
-    unit?:UnitType
+    // These are essential for knowing the document size
+    unit:UnitType  // This is required so it's clear what unit bleed/spine/etc is
+    size:SizeId|Omit<CustomSize, 'unit'>  // Unit not allowed to avoid confusion with above
+    bleed:number|string|Big
+    spine:number|string|Big
+    // These are not essential
+    margin?:number|string|Big
+    gutter?:number|string|Big
     numbers?:'Big'|'string'|'number'
 }
