@@ -34,6 +34,37 @@ const au = list_services('au')
 ```
 
 
+### `get_common_sizes({unit?, numbers?}): GetCommonSizesItem[]`
+
+Get a list of standard book sizes, sorted by width then height.
+
+```ts
+import {get_common_sizes} from 'printing-services'
+
+// All sizes in their native units (inches or mm)
+const sizes = get_common_sizes()
+
+// All sizes converted to mm
+const sizes_mm = get_common_sizes({unit: 'mm'})
+```
+
+
+### `get_custom_dimensions(args): GetDimensionsResult`
+
+Calculate dimensions by providing your own values rather than selecting a service. Returns the same `GetDimensionsResult` as `service.get_dimensions()`. There are sensible defaults for args and the values that affect the actual document size are required (size, bleed, and spine width).
+
+```ts
+import {get_custom_dimensions} from 'printing-services'
+
+const dims = get_custom_dimensions({
+    unit: 'inch',
+    size: {width: 6, height: 9},
+    bleed: 0.125,
+    spine: 0.5,
+})
+```
+
+
 ## ServicePublic
 
 Each service object has these properties and methods:
