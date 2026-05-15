@@ -53,7 +53,7 @@ div.space-y-8
             UInput(
                 v-model='pages_str'
                 type='number'
-                placeholder='300'
+                :placeholder='pages'
                 class='w-full'
             )
 
@@ -115,10 +115,16 @@ const selected_paper = ref<string | undefined>(undefined)
 const pages_str = ref('300')
 const unit = ref<string>('mm')
 
-// Parsed pages value
-const pages = computed(() => {
-    const n = parseInt(pages_str.value)
-    return isNaN(n) ? 0 : n
+// Parsed pages value, debounced and only updates when positive (retains last valid value while editing)
+const pages = ref(parseInt(pages_str.value) || 0)
+let pages_debounce_timer:ReturnType<typeof setTimeout> | undefined
+watch(pages_str, (val) => {
+    if (!val) return  // Empty string doesn't change value
+    clearTimeout(pages_debounce_timer)
+    pages_debounce_timer = setTimeout(() => {
+        const n = parseInt(val)
+        pages.value = isNaN(n) ? 0 : n
+    }, 1000)
 })
 
 // Current service
