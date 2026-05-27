@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.."
 
 # Build and test
 .bin/build
-.bin/test
+.bin/audit
 
 # Publish to npm
 npm adduser
