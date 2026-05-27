@@ -99,10 +99,7 @@ const SPINE_150GSM:[number, string][] = [
     [82, '6.5'], [88, '7'], [96, '7.5'], [100, '8'],
 ]
 
-function calc_cover_spine({binding_type, paper_type, pages}:CalcArgs):Big {
-    if (binding_type !== 'paperback') {
-        return Big(0)
-    }
+function calc_depth({paper_type, pages}:CalcArgs):Big {
     const table = paper_type === 'white_coated' ? SPINE_128GSM : SPINE_150GSM
     for (const [max_pages, width] of table) {
         if (pages <= max_pages) {
@@ -110,6 +107,13 @@ function calc_cover_spine({binding_type, paper_type, pages}:CalcArgs):Big {
         }
     }
     return Big(table[table.length - 1]![1])
+}
+
+
+function calc_cover_spine(args:CalcArgs):Big {
+    if (args.binding_type !== 'paperback')
+        return Big(0)
+    return calc_depth(args)
 }
 
 
@@ -143,6 +147,8 @@ export default create_service({
     cover_calc_requires_binding: true,
     cover_calc_requires_ink: false,
     cover_calc_requires_paper: true,
+
+    calc_depth,
 
     calc_interior_bleed: () => Big('3'),
     calc_interior_bleed_outer_only: false,

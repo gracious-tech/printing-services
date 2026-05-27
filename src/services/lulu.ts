@@ -195,7 +195,7 @@ const SPINE_WIDTH_HARDCOVER:[number, number, Big][] = [
 
 
 // NOTE GSM doesn't appear to affect spine width for Lulu (must just be the density of paper only)
-export function calc_cover_spine({binding_type, pages}:CalcArgs):Big{
+export function calc_depth({binding_type, pages}:CalcArgs):Big{
     if (binding_type === 'hardcover' || binding_type === 'hardcover_jacket'){
         for (const [min_pages, max_pages, width] of SPINE_WIDTH_HARDCOVER){
             if (min_pages <= pages && pages <= max_pages){
@@ -203,10 +203,16 @@ export function calc_cover_spine({binding_type, pages}:CalcArgs):Big{
             }
         }
     }
-    if (binding_type === 'paperback'){
-        return Big(pages).div(444).plus(0.06)
-    }
-    return Big(0)
+
+    // Use paperback formula for all other bindings
+    return Big(pages).div(444).plus(0.06)
+}
+
+
+export function calc_cover_spine(args:CalcArgs):Big{
+    if (args.binding_type === 'paperback_coil' || args.binding_type === 'paperback_stitch')
+        return Big(0)
+    return calc_depth(args)
 }
 
 
@@ -294,6 +300,8 @@ export default create_service({
     cover_calc_requires_binding: true,
     cover_calc_requires_ink: false,
     cover_calc_requires_paper: false,
+
+    calc_depth,
 
     calc_interior_bleed: () => Big('0.125'),
     calc_interior_bleed_outer_only: false,

@@ -12,7 +12,7 @@
 import {describe, test, expect} from 'vitest'
 import Big from 'big.js'
 import kdp from '../src/services/kdp.js'
-import {calc_gutter_kdp_amount, calc_cover_spine} from '../src/services/kdp.js'
+import {calc_gutter_kdp_amount, calc_depth} from '../src/services/kdp.js'
 import type {CalcArgs} from '../src/types.js'
 
 
@@ -52,7 +52,7 @@ describe('KDP gutter calculation (official KDP values)', () => {
 })
 
 
-describe('KDP spine calculation (official KDP formulas)', () => {
+describe('KDP depth/spine calculation (official KDP formulas)', () => {
 
     // Paperback white paper: pages * 0.002252"
     test('paperback white 300 pages', () => {
@@ -64,7 +64,7 @@ describe('KDP spine calculation (official KDP formulas)', () => {
             paper_type: 'white',
         }
         // 300 * 0.002252 = 0.6756
-        expect(calc_cover_spine(args).toFixed(4)).toBe('0.6756')
+        expect(calc_depth(args).toFixed(4)).toBe('0.6756')
     })
 
     // Paperback cream paper: pages * 0.0025"
@@ -77,7 +77,7 @@ describe('KDP spine calculation (official KDP formulas)', () => {
             paper_type: 'cream',
         }
         // 300 * 0.0025 = 0.75
-        expect(calc_cover_spine(args).toFixed(4)).toBe('0.7500')
+        expect(calc_depth(args).toFixed(4)).toBe('0.7500')
     })
 
     // Paperback premium color: pages * 0.002347"
@@ -90,7 +90,7 @@ describe('KDP spine calculation (official KDP formulas)', () => {
             paper_type: 'white',
         }
         // 300 * 0.002347 = 0.7041
-        expect(calc_cover_spine(args).toFixed(4)).toBe('0.7041')
+        expect(calc_depth(args).toFixed(4)).toBe('0.7041')
     })
 
     // Hardcover adds 0.189" to spine
@@ -103,7 +103,7 @@ describe('KDP spine calculation (official KDP formulas)', () => {
             paper_type: 'white',
         }
         // 300 * 0.002252 + 0.189 = 0.8646
-        expect(calc_cover_spine(args).toFixed(4)).toBe('0.8646')
+        expect(calc_depth(args).toFixed(4)).toBe('0.8646')
     })
 
     test('paperback white 100 pages', () => {
@@ -115,7 +115,7 @@ describe('KDP spine calculation (official KDP formulas)', () => {
             paper_type: 'white',
         }
         // 100 * 0.002252 = 0.2252
-        expect(calc_cover_spine(args).toFixed(4)).toBe('0.2252')
+        expect(calc_depth(args).toFixed(4)).toBe('0.2252')
     })
 })
 
@@ -219,6 +219,11 @@ describe('KDP get_dimensions - paperback US Trade', () => {
         expect(dims.cover_has_flaps).toBe(false)
     })
 
+    test('depth equals spine for paperback', () => {
+        // 300 * 0.002252 = 0.6756
+        expect(dims.depth.toFixed(4)).toBe('0.6756')
+    })
+
     test('interior does not include cover', () => {
         expect(dims.interior_includes_cover).toBe(false)
     })
@@ -262,6 +267,11 @@ describe('KDP get_dimensions - hardcover US Trade', () => {
         expect(dims.cover_total_width.toFixed(4)).toBe('14.4406')
         // total_height = 9.236 + 0.591*2 = 10.418
         expect(dims.cover_total_height.toFixed(3)).toBe('10.418')
+    })
+
+    test('depth equals spine for hardcover', () => {
+        // 300 * 0.002252 + 0.189 = 0.8646
+        expect(dims.depth.toFixed(4)).toBe('0.8646')
     })
 })
 

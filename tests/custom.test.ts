@@ -91,6 +91,47 @@ describe('get_custom_dimensions', () => {
             })
             expect(dims.cover_has_spine).toBe(false)
         })
+
+        test('depth equals spine when spine >= 1mm', () => {
+            const dims = get_custom_dimensions({
+                unit: 'mm',
+                size: {width: 148, height: 210},
+                bleed: 3,
+                spine: 8,
+            })
+            expect(dims.depth.toFixed(0)).toBe('8')
+        })
+
+        test('depth has 1mm minimum when spine is 0', () => {
+            const dims = get_custom_dimensions({
+                unit: 'mm',
+                size: {width: 148, height: 210},
+                bleed: 3,
+                spine: 0,
+            })
+            expect(dims.depth.toFixed(0)).toBe('1')
+        })
+
+        test('depth has 1mm minimum in inches', () => {
+            const dims = get_custom_dimensions({
+                unit: 'inch',
+                size: {width: 6, height: 9},
+                bleed: 0.125,
+                spine: 0,
+            })
+            // 1mm = 1/25.4 = 0.03937...
+            expect(dims.depth.toFixed(4)).toBe('0.0394')
+        })
+
+        test('depth clamps small spine to 1mm', () => {
+            const dims = get_custom_dimensions({
+                unit: 'mm',
+                size: {width: 148, height: 210},
+                bleed: 3,
+                spine: 0.5,
+            })
+            expect(dims.depth.toFixed(0)).toBe('1')
+        })
     })
 
     describe('defaults', () => {

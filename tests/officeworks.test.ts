@@ -7,6 +7,7 @@
 // - Sizes: A5, A4 only
 
 import {describe, test, expect} from 'vitest'
+import Big from 'big.js'
 import {get_service} from '../src/index.js'
 
 
@@ -88,6 +89,14 @@ describe('Officeworks dimensions - A5 booklet', () => {
         expect(dims.cover_total_width.toFixed(0)).toBe('306')
         // 210 + 5*2 = 220
         expect(dims.cover_total_height.toFixed(0)).toBe('220')
+    })
+
+    test('depth approximated via Lulu paperback formula in mm', () => {
+        // Lulu formula: pages/444 + 0.06 (in inches), converted to mm
+        // 20/444 + 0.06 = 0.10504504... inches * 25.4 = 2.668...mm
+        const expected_inches = Big(20).div(444).plus(0.06)
+        const expected_mm = expected_inches.times('25.4')
+        expect(dims.depth.toFixed(3)).toBe(expected_mm.toFixed(3))
     })
 })
 

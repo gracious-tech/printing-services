@@ -53,6 +53,8 @@ export function get_custom_dimensions(args:GetCustomDimensionsArgs):GetDimension
         cover_calc_requires_ink: false,
         cover_calc_requires_paper: false,
 
+        calc_depth: () => Big(args.spine),  // 1mm minimum enforced in get_dimensions()
+
         calc_interior_bleed: () => Big(args.bleed),
         calc_interior_bleed_outer_only: false,
         calc_interior_margin: () => Big(args.margin ?? convert_inch('0.5')),

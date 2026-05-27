@@ -149,7 +149,7 @@ export function calc_gutter_kdp_amount(pages:number):Big{
 }
 
 
-export function calc_cover_spine({pages, binding_type, paper_type, ink_type}:CalcArgs):Big{
+export function calc_depth({pages, binding_type, paper_type, ink_type}:CalcArgs):Big{
 
     // Work out page thickness
     let page_thickness = '0.002252'
@@ -214,6 +214,8 @@ export default create_service({
     cover_calc_requires_ink: true,
     cover_calc_requires_paper: true,
 
+    calc_depth,
+
     calc_interior_bleed: () => Big('0.125'),
     calc_interior_bleed_outer_only: true,
     // WARN KDP sometimes includes bleed when talking about the margin, so ignore that
@@ -225,7 +227,7 @@ export default create_service({
     calc_cover_bleed: ({binding_type}) => Big(binding_type === 'paperback' ? '0.125' : '0.591'),
     // For hardcover: setting margin as "hinge" margin for all sides for simplicity
     calc_cover_margin: ({binding_type}) => Big(binding_type === 'paperback' ? '0.125' : '0.394'),
-    calc_cover_spine,
+    calc_cover_spine: calc_depth,
     calc_cover_spine_margin: () => Big('0.0625'),
     calc_cover_spine_text: ({pages}) => pages > 79,
     calc_cover_flap: () => Big(0),

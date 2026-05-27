@@ -67,7 +67,7 @@ export default create_service({
         },
     },
 
-    ...generate_simple_inline_cover_options({bleed: '3', margin: '3'}),
+    ...generate_simple_inline_cover_options({unit: 'mm', bleed: '3', margin: '3'}),
 
     url_website: 'https://www.vistaprint.com.au/marketing-materials/booklets',
     url_guide: 'https://www.vistaprint.com.au/legal/terms-and-conditions/booklet-guidelines.pdf',

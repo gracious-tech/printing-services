@@ -57,7 +57,7 @@ export default create_service({
         },
     },
 
-    ...generate_simple_inline_cover_options({bleed: '5', margin: '5'}),
+    ...generate_simple_inline_cover_options({unit: 'mm', bleed: '5', margin: '5'}),
 
     url_website: 'https://www.officeworks.com.au/print-copy/p/premium-booklets-pcdhpbcp',
     url_guide: 'https://www.officeworks.com.au/print-copy/p/premium-booklets-pcdhpbcp',

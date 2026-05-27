@@ -208,6 +208,11 @@ export function create_service(c:ServiceConfig):ServicePublic {
             paper_type: args.paper_type,
         }
 
+        // Calculate depth and enforce minimum of 1mm
+        const depth_raw = c.calc_depth(calc_args)
+        const min_depth = convert_unit('1', 'mm', c.unit)
+        const depth = depth_raw.lt(min_depth) ? min_depth : depth_raw
+
         // Interior parts
         const interior_bleed = c.calc_interior_bleed(calc_args)
         const interior_margin = c.calc_interior_margin(calc_args)
@@ -327,6 +332,8 @@ export function create_service(c:ServiceConfig):ServicePublic {
             cover_has_spine: cover_spine.gt(0),
             cover_has_spine_text: c.calc_cover_spine_text(calc_args),
             cover_has_flaps: cover_flap.gt(0),
+
+            depth: convert(depth),
         }
     }
 
@@ -368,13 +375,20 @@ export const GLOSSY_MATTE_COVER_TYPES:Partial<Record<CoverTypeId, ServiceConfigC
 
 
 // Shortcut for specifying calc properties for stitch-only services that include cover in interior
-export function generate_simple_inline_cover_options({bleed, margin}:{bleed:string, margin:string}){
+export function generate_simple_inline_cover_options(
+        {unit, bleed, margin}:{unit:UnitType, bleed:string, margin:string}){
+
+    // Use Lulu's paperback spine formula as a standard guess at depth since no printed spine
+    const lulu_formula = (pages:number) => Big(pages).div(444).plus(0.06)
+
     return {
         interior_includes_cover: true,
         interior_calc_requires_binding: false,
         cover_calc_requires_binding: false,
         cover_calc_requires_ink: false,
         cover_calc_requires_paper: false,
+
+        calc_depth: ({pages}:CalcArgs) => convert_unit(lulu_formula(pages), 'inch', unit),
 
         calc_interior_bleed: () => Big(bleed),
         calc_interior_bleed_outer_only: false,

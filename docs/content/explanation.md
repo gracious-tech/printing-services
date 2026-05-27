@@ -37,3 +37,9 @@ For hardcovers, to simplify things, the "wrap" is just considered to be the same
 General use printers usually won't allow a cover to be uploaded separately, it will simply be part of the interior PDF. This is the case when `interior_includes_cover` is true. When it is true, `interior_blank_pages` will tell you if you need to insert any blank pages at the end of your content to ensure the back cover page will actually be printed as the last page of the book (on the back).
 
 These services will probably also print the first content page on the **back** of the front cover (unlike a paperback), and print the last page on the other side of the back cover. To avoid this, you can simply add a blank page to the start and end of your interior content.
+
+
+## Depth
+The `depth` property represents the thickness of the book. For bindings that have a spine (e.g. paperback, hardcover), this equals the spine width. For bindings without a spine (e.g. saddle stitch, coil, wire), this is an approximation. The minimum amount is 1mm.
+
+This value does not affect the design of covers but can be useful for 3D rendering and packaging calculations. In reality, the true thickness of a book will likely be slightly more due to printing imperfections and humidity etc. So if you need an exact value, it's safer to add a little to the amount.

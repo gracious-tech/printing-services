@@ -80,6 +80,8 @@ const props = defineProps<{
 const metadata_rows = computed(() => [
     {key: 'unit', value: props.dims.unit,
         desc: 'Unit of all dimensions'},
+    {key: 'depth', value: props.dims.depth,
+        desc: 'Book thickness (an estimate when no spine)'},
     {key: 'interior_includes_cover', value: props.dims.interior_includes_cover,
         desc: 'Whether interior PDF includes cover pages'},
     {key: 'interior_blank_pages', value: props.dims.interior_blank_pages,

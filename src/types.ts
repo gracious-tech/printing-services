@@ -231,6 +231,8 @@ export interface GetDimensionsResult<N = Big> {
     cover_has_spine:boolean
     cover_has_spine_text:boolean
     cover_has_flaps:boolean
+
+    depth:N
 }
 
 
@@ -315,6 +317,8 @@ export interface ServiceConfig {
     cover_calc_requires_binding:boolean
     cover_calc_requires_paper:boolean
     cover_calc_requires_ink:boolean
+
+    calc_depth(args:CalcArgs):Big
 
     calc_interior_bleed(args:CalcArgs):Big
     calc_interior_bleed_outer_only:boolean

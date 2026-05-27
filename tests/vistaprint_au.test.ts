@@ -7,6 +7,7 @@
 // - Sizes: A5, A5 Landscape, A4, A4 Landscape
 
 import {describe, test, expect} from 'vitest'
+import Big from 'big.js'
 import {get_service} from '../src/index.js'
 
 
@@ -75,6 +76,13 @@ describe('VistaPrint AU dimensions - A5 booklet', () => {
     test('no spine for stitch binding', () => {
         expect(dims.cover_has_spine).toBe(false)
         expect(dims.cover_spine.toFixed(0)).toBe('0')
+    })
+
+    test('depth approximated via Lulu paperback formula in mm', () => {
+        // Lulu formula: pages/444 + 0.06 (in inches), converted to mm
+        const expected_inches = Big(20).div(444).plus(0.06)
+        const expected_mm = expected_inches.times('25.4')
+        expect(dims.depth.toFixed(3)).toBe(expected_mm.toFixed(3))
     })
 
     test('cover total for stitch (two faces + bleed, no spine)', () => {

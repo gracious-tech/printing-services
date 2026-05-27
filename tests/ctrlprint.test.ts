@@ -171,12 +171,38 @@ describe('ctrlPrint dimensions - perfect bound A5', () => {
         expect(dims.cover_total_height.toFixed(0)).toBe('216')
     })
 
+    test('depth equals spine for paperback', () => {
+        // 60 pages 128gsm = 4.5mm (from lookup table)
+        expect(dims.depth.toFixed(1)).toBe('4.5')
+    })
+
     test('bleed is on all 4 edges', () => {
         expect(dims.interior_has_bleed).toBe(true)
     })
 
     test('interior does not include cover', () => {
         expect(dims.interior_includes_cover).toBe(false)
+    })
+})
+
+
+describe('ctrlPrint dimensions - wire A5 (depth without spine)', () => {
+
+    const dims = ctrlprint.get_dimensions({
+        size: 'a5',
+        pages: 40,
+        binding_type: 'paperback_wire',
+        paper_type: 'white',
+    })
+
+    test('wire has no spine', () => {
+        expect(dims.cover_has_spine).toBe(false)
+        expect(dims.cover_spine.toString()).toBe('0')
+    })
+
+    test('wire still has depth from lookup table', () => {
+        // 40 pages 150gsm (white = 150gsm table) = 4mm
+        expect(dims.depth.toString()).toBe('4')
     })
 })
 

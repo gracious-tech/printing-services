@@ -16,6 +16,7 @@ import Big from 'big.js'
 import lulu from '../src/services/lulu.js'
 import {
     calc_interior_gutter,
+    calc_depth,
     calc_cover_spine,
     calc_cover_bleed,
     calc_cover_margin,
@@ -160,6 +161,34 @@ describe('Lulu spine calculation - coil/stitch', () => {
 
     test('stitch has no spine', () => {
         expect(calc_cover_spine(args({binding_type: 'paperback_stitch'})).toString()).toBe('0')
+    })
+})
+
+
+describe('Lulu depth calculation', () => {
+
+    // Depth uses the paperback formula for non-hardcover bindings (including coil/stitch)
+    test('coil depth uses paperback formula', () => {
+        const depth = calc_depth(args({binding_type: 'paperback_coil', pages: 100}))
+        const expected = Big(100).div(444).plus(0.06)
+        expect(depth.toFixed(6)).toBe(expected.toFixed(6))
+    })
+
+    test('stitch depth uses paperback formula', () => {
+        const depth = calc_depth(args({binding_type: 'paperback_stitch', pages: 50}))
+        const expected = Big(50).div(444).plus(0.06)
+        expect(depth.toFixed(6)).toBe(expected.toFixed(6))
+    })
+
+    test('hardcover depth uses lookup table', () => {
+        // 300 pages hardcover = 0.938" (from SPINE_WIDTH_HARDCOVER table)
+        expect(calc_depth(args({binding_type: 'hardcover', pages: 300})).toString()).toBe('0.938')
+    })
+
+    test('paperback depth same as spine', () => {
+        const depth = calc_depth(args({pages: 300}))
+        const spine = calc_cover_spine(args({pages: 300}))
+        expect(depth.toFixed(6)).toBe(spine.toFixed(6))
     })
 })
 
@@ -332,6 +361,11 @@ describe('Lulu get_dimensions - paperback US Trade 300 pages', () => {
     test('has spine text (300 >= 82)', () => {
         expect(dims.cover_has_spine_text).toBe(true)
     })
+
+    test('depth equals spine for paperback', () => {
+        const expected = Big(300).div(444).plus(0.06)
+        expect(dims.depth.toFixed(6)).toBe(expected.toFixed(6))
+    })
 })
 
 
@@ -376,6 +410,10 @@ describe('Lulu get_dimensions - hardcover case wrap US Trade', () => {
     test('no flaps for case wrap', () => {
         expect(dims.cover_has_flaps).toBe(false)
     })
+
+    test('depth equals spine for hardcover', () => {
+        expect(dims.depth.toString()).toBe('0.938')
+    })
 })
 
 
@@ -412,6 +450,28 @@ describe('Lulu get_dimensions - hardcover jacket US Trade', () => {
         expect(dims.cover_total_width.toString()).toBe('20.938')
         // total_height = 9.25 + 0.25*2 = 9.75
         expect(dims.cover_total_height.toString()).toBe('9.75')
+    })
+})
+
+
+describe('Lulu get_dimensions - coil depth (no spine)', () => {
+
+    const dims = lulu.get_dimensions({
+        size: 'us_trade',
+        pages: 100,
+        binding_type: 'paperback_coil',
+        paper_type: 'white',
+        ink_type: 'bw',
+    })
+
+    test('coil has no spine', () => {
+        expect(dims.cover_has_spine).toBe(false)
+        expect(dims.cover_spine.toString()).toBe('0')
+    })
+
+    test('coil still has depth (approximated via paperback formula)', () => {
+        const expected = Big(100).div(444).plus(0.06)
+        expect(dims.depth.toFixed(6)).toBe(expected.toFixed(6))
     })
 })
 
